@@ -2,6 +2,7 @@
   "dependencies": {
     "lucide-react": "^0.475.0",
     "re-resizable": "^6.10.3",
-    "react-draggable": "^4.4.6"
+    "react-draggable": "^4.4.6",
+    "react-scripts": "^5.0.1"
   }
 }
