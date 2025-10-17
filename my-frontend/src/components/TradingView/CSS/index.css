@@ -469,10 +469,31 @@ h3 {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.9rem;
-  background-color: #f8fafc;
+  background-color: #ffffff;
   transition: all 0.2s;
-  color: #1e293b;
+  color: #1e293b !important;
   box-shadow: inset 0 2px 4px rgba(124, 58, 237, 0.05);
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  -webkit-text-fill-color: #1e293b;
+  opacity: 1;
+}
+
+.form-group input[type="number"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+.form-group input[type="number"]::-webkit-inner-spin-button,
+.form-group input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-group input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
 }
 
 .form-group input:focus,
