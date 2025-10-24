@@ -4,7 +4,8 @@ import { Briefcase, TrendingUp, TrendingDown } from "lucide-react";
 import "./CSS/index.css";
 
 export const Portfolio = () => {
-  const [portfolio, setPortfolio] = useState([]);
+  const [usdStocks, setUsdStocks] = useState([]);
+  const [inrStocks, setInrStocks] = useState([]);
   const [message, setMessage] = useState("");
   const [token, setToken] = useState("");
   const [userId, setUserId] = useState("");
@@ -77,14 +78,17 @@ export const Portfolio = () => {
           return;
         }
 
-        // Convert object to array
+        // Convert object to array and separate by currency
         const portfolioArray = Object.entries(res.data.portfolio).map(([ticker, stock]) => ({
           ticker,
           ...stock,
         }));
 
-        console.log("Formatted Portfolio Array:", portfolioArray);
-        setPortfolio(portfolioArray);
+        const usdHoldings = portfolioArray.filter(stock => stock.market === 'USD');
+        const inrHoldings = portfolioArray.filter(stock => stock.market === 'INR');
+
+        setUsdStocks(usdHoldings);
+        setInrStocks(inrHoldings);
       })
       .catch((err) => {
         console.error("Error fetching portfolio:", err);
@@ -93,34 +97,103 @@ export const Portfolio = () => {
           if (err.response.status === 401) {
             setMessage("Session expired. Please login again.");
           } else if (err.response.status === 404) {
-            // 404 with message means no holdings, not endpoint error
             console.log("No holdings found (404 response)");
-            setPortfolio([]);
+            setUsdStocks([]);
+            setInrStocks([]);
             setMessage(err.response.data.message || "No holdings found");
           }
         }
       });
   };
 
-  // Calculate total portfolio value
-  const calculateTotalValue = () => {
-    return portfolio.reduce((total, stock) => total + (stock.total_market_value || 0), 0);
+  // Separate calculations for USD and INR portfolios
+  const calculateValues = (stocks) => ({
+    totalValue: stocks.reduce((total, stock) => total + (stock.total_market_value || 0), 0),
+    totalPL: stocks.reduce((total, stock) => total + (stock.unrealized_pl || 0), 0),
+    totalCost: stocks.reduce((total, stock) => total + (stock.total_cost || 0), 0),
+  });
+
+  const usdValues = calculateValues(usdStocks);
+  const inrValues = calculateValues(inrStocks);
+
+  const getCurrencySymbol = (currency) => {
+    return currency === 'USD' ? '$' : '₹';
   };
 
-  // Calculate total profit/loss
-  const calculateTotalPL = () => {
-    return portfolio.reduce((total, stock) => total + (stock.unrealized_pl || 0), 0);
-  };
+  const renderHoldingsSection = (stocks, currency) => (
+    <div className="portfolio-holdings">
+      <div className="section-header">
+        <h2>{currency} Holdings</h2>
+      </div>
 
-  // Calculate total cost
-  const calculateTotalCost = () => {
-    return portfolio.reduce((total, stock) => total + (stock.total_cost || 0), 0);
-  };
+      {stocks.length > 0 ? (
+        <div className="holdings-grid">
+          {stocks.map((stock, index) => (
+            <div key={index} className="holding-card">
+              <div className="holding-header">
+                <div className="holding-ticker">
+                  <strong>{stock.ticker}</strong>
+                  <span className="holding-market">({stock.market})</span>
+                </div>
+                <div className={`holding-pl ${stock.unrealized_pl >= 0 ? 'positive' : 'negative'}`}>
+                  {stock.unrealized_pl >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                  {getCurrencySymbol(currency)}{Math.abs(stock.unrealized_pl?.toFixed(2))}
+                </div>
+              </div>
 
-  const totalValue = calculateTotalValue();
-  const totalPL = calculateTotalPL();
-  const totalCost = calculateTotalCost();
-  const totalPLPercentage = totalCost > 0 ? ((totalPL / totalCost) * 100) : 0;
+              <div className="holding-stats">
+                <div className="stat-row">
+                  <span className="stat-label">Shares</span>
+                  <span className="stat-value">{stock.total_quantity}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Avg Cost</span>
+                  <span className="stat-value">{getCurrencySymbol(currency)}{stock.average_cost?.toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Current Price</span>
+                  <span className="stat-value">{getCurrencySymbol(currency)}{stock.current_price?.toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Total Cost</span>
+                  <span className="stat-value">{getCurrencySymbol(currency)}{stock.total_cost?.toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span className="stat-label">Market Value</span>
+                  <span className="stat-value">{getCurrencySymbol(currency)}{stock.total_market_value?.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="holding-lots">
+                <h4 className="lots-header">Purchase History</h4>
+                <div className="lots-list">
+                  {stock.lots.map((lot) => (
+                    <div key={lot.lot_id} className="lot-item">
+                      <div className="lot-info">
+                        <span className="lot-date">
+                          📅 {new Date(lot.purchase_date).toLocaleDateString()}
+                        </span>
+                        <span className="lot-details">
+                          {lot.quantity} shares @ {getCurrencySymbol(currency)}{lot.purchase_price?.toFixed(2)}
+                        </span>
+                      </div>
+                      <span className="lot-cost">{getCurrencySymbol(currency)}{lot.cost_basis?.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="portfolio-empty">
+          <Briefcase size={64} />
+          <p>No {currency} stocks owned yet</p>
+          <p className="empty-subtitle">Start trading to build your portfolio!</p>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="portfolio-page">
@@ -137,107 +210,52 @@ export const Portfolio = () => {
           </div>
         </div>
 
-        {/* Portfolio Summary Cards */}
+        {/* Display message if exists */}
+        {message && <div className="status-message">{message}</div>}
+
+        {/* USD Portfolio Summary */}
+        <h2 className="currency-header">USD Portfolio</h2>
         <div className="portfolio-summary">
           <div className="summary-card">
-            <div className="summary-label">Total Market Value</div>
-            <div className="summary-value">${totalValue.toFixed(2)}</div>
+            <div className="summary-label">USD Market Value</div>
+            <div className="summary-value">${usdValues.totalValue.toFixed(2)}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">Total Cost Basis</div>
-            <div className="summary-value">${totalCost.toFixed(2)}</div>
+            <div className="summary-label">USD Cost Basis</div>
+            <div className="summary-value">${usdValues.totalCost.toFixed(2)}</div>
           </div>
           <div className="summary-card">
-            <div className="summary-label">Total P&L</div>
-            <div className={`summary-value ${totalPL >= 0 ? 'positive' : 'negative'}`}>
-              {totalPL >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-              ${totalPL.toFixed(2)} ({totalPLPercentage.toFixed(2)}%)
+            <div className="summary-label">USD P&L</div>
+            <div className={`summary-value ${usdValues.totalPL >= 0 ? 'positive' : 'negative'}`}>
+              {usdValues.totalPL >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+              ${usdValues.totalPL.toFixed(2)}
             </div>
           </div>
         </div>
 
-        {/* Portfolio Holdings */}
-        <div className="portfolio-holdings">
-          <div className="section-header">
-            <h2>Holdings</h2>
-            <button className="refresh-button" onClick={fetchPortfolio}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-              </svg>
-              Refresh Portfolio
-            </button>
+        {renderHoldingsSection(usdStocks, 'USD')}
+
+        {/* INR Portfolio Summary */}
+        <h2 className="currency-header">INR Portfolio</h2>
+        <div className="portfolio-summary">
+          <div className="summary-card">
+            <div className="summary-label">INR Market Value</div>
+            <div className="summary-value">₹{inrValues.totalValue.toFixed(2)}</div>
           </div>
-
-          {message && <div className="status-message">{message}</div>}
-
-          {portfolio.length > 0 ? (
-            <div className="holdings-grid">
-              {portfolio.map((stock, index) => (
-                <div key={index} className="holding-card">
-                  <div className="holding-header">
-                    <div className="holding-ticker">
-                      <strong>{stock.ticker}</strong>
-                      <span className="holding-market">({stock.market})</span>
-                    </div>
-                    <div className={`holding-pl ${stock.unrealized_pl >= 0 ? 'positive' : 'negative'}`}>
-                      {stock.unrealized_pl >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                      ${stock.unrealized_pl?.toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="holding-stats">
-                    <div className="stat-row">
-                      <span className="stat-label">Shares</span>
-                      <span className="stat-value">{stock.total_quantity}</span>
-                    </div>
-                    <div className="stat-row">
-                      <span className="stat-label">Avg Cost</span>
-                      <span className="stat-value">${stock.average_cost?.toFixed(2)}</span>
-                    </div>
-                    <div className="stat-row">
-                      <span className="stat-label">Current Price</span>
-                      <span className="stat-value">${stock.current_price?.toFixed(2)}</span>
-                    </div>
-                    <div className="stat-row">
-                      <span className="stat-label">Total Cost</span>
-                      <span className="stat-value">${stock.total_cost?.toFixed(2)}</span>
-                    </div>
-                    <div className="stat-row">
-                      <span className="stat-label">Market Value</span>
-                      <span className="stat-value">${stock.total_market_value?.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="holding-lots">
-                    <h4 className="lots-header">Purchase History</h4>
-                    <div className="lots-list">
-                      {stock.lots.map((lot) => (
-                        <div key={lot.lot_id} className="lot-item">
-                          <div className="lot-info">
-                            <span className="lot-date">
-                              📅 {new Date(lot.purchase_date).toLocaleDateString()}
-                            </span>
-                            <span className="lot-details">
-                              {lot.quantity} shares @ ${lot.purchase_price?.toFixed(2)}
-                            </span>
-                          </div>
-                          <span className="lot-cost">${lot.cost_basis?.toFixed(2)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
+          <div className="summary-card">
+            <div className="summary-label">INR Cost Basis</div>
+            <div className="summary-value">₹{inrValues.totalCost.toFixed(2)}</div>
+          </div>
+          <div className="summary-card">
+            <div className="summary-label">INR P&L</div>
+            <div className={`summary-value ${inrValues.totalPL >= 0 ? 'positive' : 'negative'}`}>
+              {inrValues.totalPL >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+              ₹{inrValues.totalPL.toFixed(2)}
             </div>
-          ) : (
-            <div className="portfolio-empty">
-              <Briefcase size={64} />
-              <p>No stocks owned yet</p>
-              <p className="empty-subtitle">Start trading to build your portfolio!</p>
-            </div>
-          )}
+          </div>
         </div>
+
+        {renderHoldingsSection(inrStocks, 'INR')}
       </div>
     </div>
   );

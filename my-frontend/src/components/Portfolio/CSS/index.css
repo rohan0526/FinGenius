@@ -355,6 +355,35 @@
   font-weight: 500;
 }
 
+/* Currency Section Headers */
+.currency-header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 32px 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* Adjust spacing between currency sections */
+.portfolio-holdings + .currency-header {
+  margin-top: 48px;
+}
+
+/* Currency specific colors */
+.summary-card .summary-value .currency-symbol {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+/* Responsive adjustments for currency sections */
+@media (max-width: 768px) {
+  .currency-header {
+    font-size: 1.25rem;
+    margin: 24px 0 16px 0;
+  }
+}
+
 /* Scrollbar Styling */
 .lots-list::-webkit-scrollbar {
   width: 6px;
