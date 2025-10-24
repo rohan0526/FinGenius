@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import "./CSS/index.css";
 
 export const TradingView = () => {
@@ -8,15 +8,37 @@ export const TradingView = () => {
   const [quantity, setQuantity] = useState("");
   const [market, setMarket] = useState("USD");
   const [message, setMessage] = useState("");
-  const [token, setToken] = useState("");
-  const [userId, setUserId] = useState("");
   const [watchlist, setWatchlist] = useState([
+    // US Market stocks
     "NASDAQ:AAPL",
     "NASDAQ:GOOGL",
     "NASDAQ:MSFT",
     "NASDAQ:TSLA",
+    "NASDAQ:META",
+    "NASDAQ:AMZN",
+    "NASDAQ:NFLX",
+    "NASDAQ:NVDA",
+    "NASDAQ:AMD",
+    "NASDAQ:INTC",
     "NYSE:BAC",
-    "NYSE:JPM"
+    "NYSE:JPM",
+    "NYSE:GS",
+    "NYSE:MS",
+    "NYSE:V",
+    "NYSE:MA",
+    "NYSE:DIS",
+    "NYSE:KO",
+    "NYSE:WMT",
+    "NYSE:PG",
+    // Indian Market stocks
+    "NSE:RELIANCE",
+    "NSE:TCS",
+    "NSE:INFY",
+    "NSE:HDFC",
+    "NSE:SBIN",
+    "NSE:ICICI",
+    "NSE:TATAMOTORS",
+    "NSE:WIPRO"
   ]);
   const [newWatchlistItem, setNewWatchlistItem] = useState("");
   const [showWatchlistModal, setShowWatchlistModal] = useState(false);
@@ -31,27 +53,9 @@ export const TradingView = () => {
     console.log("Token from localStorage:", storedToken ? storedToken.substring(0, 30) + "..." : "NOT FOUND");
     console.log("User from localStorage:", storedUser);
     
-    if (storedToken) {
-      setToken(storedToken);
-      console.log("✅ Token set in state");
-    } else {
+    if (!storedToken) {
       console.error("❌ No token found in localStorage");
       setMessage("Please login to access trading");
-    }
-    
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        console.log("User data parsed:", userData);
-        if (userData.user_id) {
-          setUserId(userData.user_id);
-          console.log("✅ User ID set:", userData.user_id);
-        }
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-      }
-    } else {
-      console.error("❌ No user data found in localStorage");
     }
   }, []);
 
@@ -68,7 +72,7 @@ export const TradingView = () => {
       width: "100%",
       height: "100%",
       autosize: true,
-      symbol: "NASDAQ:AAPL",
+      symbol: "NASDAQ:TSLA",
       interval: "D",
       timezone: "exchange",
       theme: "light",
@@ -87,8 +91,30 @@ export const TradingView = () => {
         "NASDAQ:GOOGL",
         "NASDAQ:MSFT",
         "NASDAQ:TSLA",
+        "NASDAQ:META",
+        "NASDAQ:AMZN",
+        "NASDAQ:NFLX",
+        "NASDAQ:NVDA",
+        "NASDAQ:AMD",
+        "NASDAQ:INTC",
         "NYSE:BAC",
-        "NYSE:JPM"
+        "NYSE:JPM",
+        "NYSE:GS",
+        "NYSE:MS",
+        "NYSE:V",
+        "NYSE:MA",
+        "NYSE:DIS",
+        "NYSE:KO",
+        "NYSE:WMT",
+        "NYSE:PG",
+        "NSE:RELIANCE",
+        "NSE:TCS",
+        "NSE:INFY",
+        "NSE:HDFC",
+        "NSE:SBIN",
+        "NSE:ICICI",
+        "NSE:TATAMOTORS",
+        "NSE:WIPRO"
       ]
     };
 
@@ -106,11 +132,11 @@ export const TradingView = () => {
                 try {
                   const data = JSON.parse(event.data);
                   if (data.name === 'symbolChange') {
-                    const symbol = data.data[0].split(':')[1]; // Extract ticker from "NASDAQ:AAPL" format
+                    const exchangeSymbol = data.data[0];
+                    const [exchange, symbol] = exchangeSymbol.split(':');
                     setTicker(symbol);
                     
                     // Determine market based on exchange
-                    const exchange = data.data[0].split(':')[0];
                     if (exchange === 'NSE' || exchange === 'BSE') {
                       setMarket('INR');
                     } else {
@@ -137,91 +163,97 @@ export const TradingView = () => {
 
   // Buy Stock
   const buyStock = () => {
-    // Validate inputs
     if (!ticker || !quantity) {
       setMessage("Please enter ticker and quantity");
       return;
     }
     
-    // Validate token exists
     const currentToken = localStorage.getItem('token');
-    console.log("Current token:", currentToken ? "Token exists" : "No token found");
-    
     if (!currentToken) {
       setMessage("Unauthorized - Please login again");
       return;
     }
     
-    console.log("Buying stock:", { ticker, quantity, market });
-    console.log("Using token:", currentToken.substring(0, 20) + "...");
-    console.log("Full request body:", JSON.stringify({ ticker, quantity, market }));
+    // Format ticker for Indian market
+    const formattedTicker = market === 'INR' ? ticker.replace('.NS', '') : ticker;
+    const endpoint = market === 'INR' ? '/tradeINR/buy' : '/trade/buy';  // Updated endpoint
     
-    axios
-      .post(
-        "https://rapid-grossly-raven.ngrok-free.app/trade/buy",
-        { ticker, quantity, market },
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${currentToken}`
-          },
-        }
-      )
-      .then((res) => {
-        console.log("Buy response:", res.data);
-        setMessage(res.data.message);
-      })
-      .catch((err) => {
-        console.error("Error buying stock:", err);
-        console.error("Error response:", err.response?.data);
-        if (err.response?.status === 401) {
-          setMessage("Unauthorized - Session expired. Please login again.");
-        } else {
-          setMessage(err.response?.data?.error || "Purchase failed");
-        }
-      });
+    console.log("Buying stock:", { ticker: formattedTicker, quantity, market });
+    
+    axios.post(
+      `https://rapid-grossly-raven.ngrok-free.app${endpoint}`,
+      { 
+        ticker: formattedTicker, 
+        quantity: parseInt(quantity), 
+        cache_duration: 60,
+        force_refresh: false
+      },
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentToken}`
+        },
+      }
+    )
+    .then((res) => {
+      console.log("Buy response:", res.data);
+      const currency = market === 'INR' ? '₹' : '$';
+      setMessage(`${res.data.message} | Price: ${currency}${res.data.price_per_share} | Total Cost: ${currency}${res.data.total_cost}`);
+    })
+    .catch((err) => {
+      console.error("Error buying stock:", err);
+      if (err.response?.status === 401) {
+        setMessage("Unauthorized - Session expired. Please login again.");
+      } else {
+        setMessage(err.response?.data?.error || "Purchase failed");
+      }
+    });
   };
 
   // Sell Stock
   const sellStock = () => {
-    // Validate token exists
     const currentToken = localStorage.getItem('token');
-    console.log("Current token:", currentToken ? "Token exists" : "No token found");
-    
     if (!currentToken) {
       setMessage("Unauthorized - Please login again");
       return;
     }
     
-    console.log("Selling stock:", { ticker, quantity, market });
-    console.log("Using token:", currentToken.substring(0, 20) + "...");
+    // Format ticker for Indian market
+    const formattedTicker = market === 'INR' ? ticker.replace('.NS', '') : ticker;
+    const endpoint = market === 'INR' ? '/tradeINR/sell' : '/trade/sell';  // Updated endpoint
     
-    axios
-      .post(
-        "https://rapid-grossly-raven.ngrok-free.app/trade/sell",
-        { ticker, quantity, market },
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${currentToken}`
-          },
-        }
-      )
-      .then((res) => {
-        console.log("Sell response:", res.data);
-        setMessage(res.data.message);
-      })
-      .catch((err) => {
-        console.error("Error selling stock:", err);
-        console.error("Error response:", err.response?.data);
-        if (err.response?.status === 401) {
-          setMessage("Unauthorized - Session expired. Please login again.");
-        } else {
-          setMessage(err.response?.data?.error || "Sale failed");
-        }
-      });
+    console.log("Selling stock:", { ticker: formattedTicker, quantity, market });
+    
+    axios.post(
+      `https://rapid-grossly-raven.ngrok-free.app${endpoint}`,
+      { 
+        ticker: formattedTicker, 
+        quantity: parseInt(quantity), 
+        cache_duration: 60,
+        force_refresh: false
+      },
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${currentToken}`
+        },
+      }
+    )
+    .then((res) => {
+      console.log("Sell response:", res.data);
+      const currency = market === 'INR' ? '₹' : '$';
+      setMessage(`${res.data.message} | Price: ${currency}${res.data.price_per_share} | Revenue: ${currency}${res.data.total_revenue} | P/L: ${currency}${res.data.realized_pl}`);
+    })
+    .catch((err) => {
+      console.error("Error selling stock:", err);
+      if (err.response?.status === 401) {
+        setMessage("Unauthorized - Session expired. Please login again.");
+      } else {
+        setMessage(err.response?.data?.error || "Sale failed");
+      }
+    });
   };
 
   // Function to reinitialize the TradingView widget
@@ -268,23 +300,22 @@ export const TradingView = () => {
     // Format the input to match TradingView format
     let formattedItem = newWatchlistItem.toUpperCase();
     if (!formattedItem.includes(':')) {
-      formattedItem = `NASDAQ:${formattedItem}`; // Default to NASDAQ if no exchange specified
+      // Add appropriate exchange prefix based on market
+      formattedItem = market === 'USD' ? `NASDAQ:${formattedItem}` : `NSE:${formattedItem}`;
     }
     
     if (!watchlist.includes(formattedItem)) {
       const newWatchlist = [...watchlist, formattedItem];
       setWatchlist(newWatchlist);
-      // Reinitialize TradingView widget with new watchlist
       reinitializeTradingViewWidget(newWatchlist);
     }
     setNewWatchlistItem("");
-  }, [newWatchlistItem, watchlist, reinitializeTradingViewWidget]);
+  }, [newWatchlistItem, watchlist, market, reinitializeTradingViewWidget]);
 
   // Function to remove stock from watchlist
   const removeFromWatchlist = useCallback((itemToRemove) => {
     const newWatchlist = watchlist.filter(item => item !== itemToRemove);
     setWatchlist(newWatchlist);
-    // Reinitialize TradingView widget with new watchlist
     reinitializeTradingViewWidget(newWatchlist);
   }, [watchlist, reinitializeTradingViewWidget]);
 
@@ -292,19 +323,24 @@ export const TradingView = () => {
   return (
     <div className="trading-page">
       <div className="trading-container">
+        {/* Page Header */}
         <div className="page-header">
           <div className="header-content">
             <div className="header-icon">
-              <BarChart3 size={32} />
+              <BarChart3 size={36} />
             </div>
             <div>
               <h1>Paper Trading Platform</h1>
-              <p className="header-subtitle">Practice trading with real-time market data</p>
+              <p className="header-subtitle">
+                Practice trading with real-time market data and advanced analytics
+              </p>
             </div>
           </div>
         </div>
         
+        {/* Trading Layout */}
         <div className="trading-layout">
+          {/* Left side - Chart */}
           <div className="trading-layout-left">
             <div className="chart-section">
               <div className="chart-header">
@@ -333,101 +369,104 @@ export const TradingView = () => {
               <div id="tradingview-widget"></div>
             </div>
           </div>
-          
+
+          {/* Right side - Trading Form */}
           <div className="trading-layout-right">
-          {/* Trading Form */}
-          <div className="trading-form">
-            <h2>Trade Stocks</h2>
-            
-            <div className="form-group">
-              <label htmlFor="ticker">Ticker:</label>
-              <input
-                type="text"
-                id="ticker"
-                value={ticker}
-                onChange={(e) => setTicker(e.target.value)}
-                placeholder="Enter ticker (e.g., AAPL)"
-              />
+            <div className="trading-form">
+              <h2>Trade Stocks</h2>
+              
+              <div className="form-group">
+                <label htmlFor="ticker">Stock Symbol</label>
+                <input
+                  type="text"
+                  id="ticker"
+                  value={ticker}
+                  onChange={(e) => setTicker(e.target.value)}
+                  placeholder="Enter stock symbol (e.g., AAPL)"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="quantity">Quantity</label>
+                <input
+                  type="number"
+                  id="quantity"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="Enter number of shares"
+                  min="1"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="market">Market</label>
+                <select 
+                  id="market"
+                  value={market}
+                  onChange={(e) => setMarket(e.target.value)}
+                >
+                  <option value="USD">US Market (USD)</option>
+                  <option value="INR">Indian Market (INR)</option>
+                </select>
+              </div>
+              
+              <div className="trading-buttons">
+                <button className="buy-button" onClick={buyStock}>
+                  Buy Stock
+                </button>
+                <button className="sell-button" onClick={sellStock}>
+                  Sell Stock
+                </button>
+              </div>
+
+              {message && (
+                <div className="status-message">
+                  {message}
+                </div>
+              )}
             </div>
-            
-            <div className="form-group">
-              <label htmlFor="quantity">Quantity:</label>
-              <input
-                type="number"
-                id="quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Enter quantity"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="market">Market:</label>
-              <select 
-                id="market"
-                value={market}
-                onChange={(e) => setMarket(e.target.value)}
+          </div>
+        </div>
+
+        {/* Watchlist Modal */}
+        {showWatchlistModal && (
+          <div className="modal-overlay">
+            <div className="watchlist-modal">
+              <h3>Manage Watchlist</h3>
+              
+              <div className="add-watchlist-item">
+                <input
+                  type="text"
+                  value={newWatchlistItem}
+                  onChange={(e) => setNewWatchlistItem(e.target.value)}
+                  placeholder="Enter stock symbol (e.g., NASDAQ:AAPL)"
+                />
+                <button onClick={addToWatchlist}>Add</button>
+              </div>
+
+              <ul className="watchlist-items">
+                {watchlist.map((item, index) => (
+                  <li key={index}>
+                    {item}
+                    <button 
+                      onClick={() => removeFromWatchlist(item)}
+                      className="remove-button"
+                    >
+                      ❌
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <button 
+                className="close-modal-button"
+                onClick={() => setShowWatchlistModal(false)}
               >
-                <option value="USD">USD</option>
-                <option value="INR">INR</option>
-              </select>
-            </div>
-            
-            <div className="trading-buttons">
-              <button className="buy-button" onClick={buyStock}>
-                Buy
-              </button>
-              <button className="sell-button" onClick={sellStock}>
-                Sell
+                Close
               </button>
             </div>
-
-            {/* Status Message */}
-            {message && <div className="status-message">{message}</div>}
           </div>
-          
-        </div>
-      </div>
-
-      {/* Watchlist Modal */}
-      {showWatchlistModal && (
-        <div className="modal-overlay">
-          <div className="watchlist-modal">
-            <h3>Manage Watchlist</h3>
-            
-            <div className="add-watchlist-item">
-              <input
-                type="text"
-                value={newWatchlistItem}
-                onChange={(e) => setNewWatchlistItem(e.target.value)}
-                placeholder="Enter stock symbol (e.g., NASDAQ:AAPL)"
-              />
-              <button onClick={addToWatchlist}>Add</button>
-            </div>
-
-            <ul className="watchlist-items">
-              {watchlist.map((item, index) => (
-                <li key={index}>
-                  {item}
-                  <button 
-                    onClick={() => removeFromWatchlist(item)}
-                    className="remove-button"
-                  >
-                    ❌
-                  </button>
-                </li>
-              ))}
-            </ul>
-
-            <button 
-              className="close-modal-button"
-              onClick={() => setShowWatchlistModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );
