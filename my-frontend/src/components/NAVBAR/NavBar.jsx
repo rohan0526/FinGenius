@@ -131,6 +131,9 @@ const NavBar = () => {
           <Link to="/tradingview" className={`nav-link ${isActive('/tradingview')}`}>
             Trading View
           </Link>
+          <Link to="/portfolio" className={`nav-link ${isActive('/portfolio')}`}>
+            Portfolio
+          </Link>
           <Link to="/games" className={`nav-link ${isActive('/games')}`}>
             Finance Games
           </Link>

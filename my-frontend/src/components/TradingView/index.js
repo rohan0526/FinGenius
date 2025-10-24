@@ -4,7 +4,6 @@ import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
 import "./CSS/index.css";
 
 export const TradingView = () => {
-  const [portfolio, setPortfolio] = useState([]);
   const [ticker, setTicker] = useState("");
   const [quantity, setQuantity] = useState("");
   const [market, setMarket] = useState("USD");
@@ -135,65 +134,6 @@ export const TradingView = () => {
     };
   }, []);
   
-  // Call fetchPortfolio when token and userId are available
-  useEffect(() => {
-    if (token && userId) {
-      fetchPortfolio();
-    }
-  }, [token, userId]);
-
-  // Fetch Portfolio
-  const fetchPortfolio = () => {
-    const currentToken = localStorage.getItem('token');
-    console.log("Fetching portfolio...");
-    console.log("Token available:", currentToken ? "Yes" : "No");
-    
-    if (!currentToken) {
-      console.error("No token available for portfolio fetch");
-      setMessage("Please login to view portfolio");
-      return;
-    }
-    
-    axios
-      .get("https://rapid-grossly-raven.ngrok-free.app/trade/portfolio", {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${currentToken}`
-        }
-      })
-      .then((res) => {
-        console.log("Portfolio response:", res.data);
-
-        if (!res.data || !res.data.portfolio) {
-          console.warn("Empty or invalid portfolio response");
-          return;
-        }
-
-        // Convert object to array
-        const portfolioArray = Object.entries(res.data.portfolio).map(([ticker, stock]) => ({
-          ticker,
-          ...stock,
-        }));
-
-        console.log("Formatted Portfolio Array:", portfolioArray);
-        setPortfolio(portfolioArray);
-      })
-      .catch((err) => {
-        console.error("Error fetching portfolio:", err);
-        if (err.response) {
-          console.error("Response data:", err.response.data);
-          if (err.response.status === 401) {
-            setMessage("Session expired. Please login again.");
-          } else if (err.response.status === 404) {
-            // 404 with message means no holdings, not endpoint error
-            console.log("No holdings found (404 response)");
-            setPortfolio([]);
-            setMessage(err.response.data.message || "No holdings found");
-          }
-        }
-      });
-  };
 
   // Buy Stock
   const buyStock = () => {
@@ -231,7 +171,6 @@ export const TradingView = () => {
       .then((res) => {
         console.log("Buy response:", res.data);
         setMessage(res.data.message);
-        fetchPortfolio(); // Refresh portfolio
       })
       .catch((err) => {
         console.error("Error buying stock:", err);
@@ -273,7 +212,6 @@ export const TradingView = () => {
       .then((res) => {
         console.log("Sell response:", res.data);
         setMessage(res.data.message);
-        fetchPortfolio(); // Refresh portfolio
       })
       .catch((err) => {
         console.error("Error selling stock:", err);
@@ -448,76 +386,6 @@ export const TradingView = () => {
             {message && <div className="status-message">{message}</div>}
           </div>
           
-          {/* Portfolio Section */}
-          <div className="portfolio-section">
-            <div className="section-header">
-              <h2>Your Portfolio</h2>
-              <button className="refresh-button" onClick={fetchPortfolio}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-                  <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                </svg>
-                Refresh Portfolio
-              </button>
-            </div>
-
-            {portfolio.length > 0 ? (
-              <ul className="portfolio-list">
-                {portfolio.map((stock, index) => (
-                  <li key={index} className="stock-item">
-                    <div className="stock-header">
-                      <strong>{stock.ticker}</strong> ({stock.market})
-                    </div>
-                    <div className="stock-details">
-                      <div className="stock-detail-item">
-                        <strong>Total Shares</strong>
-                        <div className="stock-detail-value">{stock.total_quantity}</div>
-                      </div>
-                      <div className="stock-detail-item">
-                        <strong>Average Cost</strong>
-                        <div className="stock-detail-value">${stock.average_cost?.toFixed(2)}</div>
-                      </div>
-                      <div className="stock-detail-item">
-                        <strong>Current Price</strong>
-                        <div className="stock-detail-value">${stock.current_price?.toFixed(2)}</div>
-                      </div>
-                      <div className="stock-detail-item">
-                        <strong>Total Cost</strong>
-                        <div className="stock-detail-value">${stock.total_cost?.toFixed(2)}</div>
-                      </div>
-                      <div className="stock-detail-item">
-                        <strong>Market Value</strong>
-                        <div className="stock-detail-value">${stock.total_market_value?.toFixed(2)}</div>
-                      </div>
-                      <div className="stock-detail-item">
-                        <strong>Unrealized P&L</strong>
-                        <div className={`stock-detail-value ${stock.unrealized_pl >= 0 ? 'change-up' : 'change-down'}`}>
-                          ${stock.unrealized_pl?.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="lots-header">Lots Purchased:</h4>
-                      <ul className="lots-list">
-                        {stock.lots.map((lot) => (
-                          <li key={lot.lot_id} className="lot-item">
-                            <span className="lot-date">📅 {new Date(lot.purchase_date).toLocaleString()}</span> - 
-                            <span className="lot-shares">{lot.quantity} shares</span> @ 
-                            <span className="lot-price">${lot.purchase_price?.toFixed(2)}</span>
-                            <span className="lot-cost">(Cost: ${lot.cost_basis?.toFixed(2)})</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="portfolio-empty">
-                <p>No stocks owned yet. Start trading to build your portfolio!</p>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 

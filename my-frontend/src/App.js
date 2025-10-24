@@ -5,6 +5,7 @@ import { AuthPage } from "./components/AuthPage";
 import { HomePage } from "./components/HomePage";
 import { Chat } from "./components/Chat";
 import { TradingView } from "./components/TradingView";
+import { Portfolio } from "./components/Portfolio";
 import { MessageCircle, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
@@ -162,6 +163,7 @@ const AppContent = () => {
           <Route path="/auth" element={user ? <Navigate to="/" /> : <AuthPage />} />
           <Route path="/chat" element={user ? <Chat /> : <Navigate to="/auth" />} />
           <Route path="/tradingview" element={user ? <TradingView /> : <Navigate to="/auth" />} />
+          <Route path="/portfolio" element={user ? <Portfolio /> : <Navigate to="/auth" />} />
           <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/auth" />} />
           
           {/* Game Routes */}
