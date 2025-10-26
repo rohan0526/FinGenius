@@ -287,6 +287,11 @@ AI-powered news analysis with sentiment scoring for your portfolio stocks.
 
 ![Stock News](screenshots/stocknews.png)
 
+### Interactive Finance Games
+Learn financial concepts through engaging games and simulations in a risk-free environment.
+
+![Finance Games](screenshots/games.png)
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
@@ -297,13 +302,6 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Authors
-
-- **Your Name** - *Initial work*
 
 ## 🙏 Acknowledgments
 
@@ -312,10 +310,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - TradingView for charting inspiration
 - shadcn/ui for beautiful components
 
-## 📞 Support
-
-For support, email support@fingenius.com or open an issue in the repository.
-
----
 
 **Made with ❤️ by the FinGenius Team**
