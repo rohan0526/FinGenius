@@ -60,12 +60,6 @@
     font-weight: 400;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
 .header-badge {
     display: flex;
     align-items: center;
@@ -77,32 +71,6 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.85rem;
     font-weight: 500;
-}
-
-.clear-chat-button {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.clear-chat-button:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.clear-chat-button:active {
-    transform: translateY(0);
 }
 
 .status-dot {
@@ -719,6 +687,206 @@
     border-top-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Technical Analysis Styles */
+.technical-analysis-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+}
+
+.technical-analysis-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.metric-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 4px;
+}
+
+.metric-badge.positive {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.metric-badge.negative {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.metric-badge.neutral {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.metric-badge.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Portfolio Position Cards */
+.portfolio-position {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.position-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.position-ticker {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.position-pl {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.position-pl.positive {
+    color: #16a34a;
+}
+
+.position-pl.negative {
+    color: #dc2626;
+}
+
+.position-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.metric-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.metric-value {
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Enhanced code blocks for structured data */
+.markdown-pre.data-section {
+    background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+    border-left: 4px solid #6366f1;
+    padding: 20px;
+    margin: 16px 0;
+}
+
+/* Emoji support */
+.message-content .emoji {
+    font-size: 1.2em;
+    vertical-align: middle;
+}
+
+/* Highlight important metrics */
+.markdown-strong.metric-highlight {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #6366f1;
+}
+
+/* Better list styling for technical data */
+.markdown-ul.technical-list {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px 16px 16px 40px;
+    margin: 12px 0;
+}
+
+.markdown-ul.technical-list .markdown-li {
+    padding: 4px 0;
+}
+
+/* Separator lines for sections */
+.section-separator {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 24px 0;
+    position: relative;
+}
+
+.section-separator::after {
+    content: '📊';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 0 12px;
+    font-size: 1.2rem;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-indicator.bullish {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-indicator.bearish {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-indicator.neutral {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.status-indicator::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .chat-page {
@@ -770,5 +938,15 @@
     .markdown-th,
     .markdown-td {
         padding: 8px 12px;
+    }
+
+    .position-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .position-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 }

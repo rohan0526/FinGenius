@@ -1,43 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { startChatSession, sendChatMessage, endChatSession } from "../../services/chatService";
-import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign, Trash2 } from "lucide-react";
+import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign, BarChart3, AlertCircle } from "lucide-react";
 import "./CSS/index.css";
 
-// LocalStorage keys for chat persistence
-const CHAT_STORAGE_KEYS = {
-  MESSAGES: 'fingenius_chat_messages',
-  SESSION_ID: 'fingenius_chat_session_id',
-  HISTORY: 'fingenius_chat_history'
-};
-
 export const Chat = () => {
-  // Load persisted data from localStorage
-  const loadPersistedData = () => {
-    try {
-      const savedMessages = localStorage.getItem(CHAT_STORAGE_KEYS.MESSAGES);
-      const savedSessionId = localStorage.getItem(CHAT_STORAGE_KEYS.SESSION_ID);
-      const savedHistory = localStorage.getItem(CHAT_STORAGE_KEYS.HISTORY);
-      
-      return {
-        messages: savedMessages ? JSON.parse(savedMessages) : [],
-        sessionId: savedSessionId || null,
-        history: savedHistory ? JSON.parse(savedHistory) : []
-      };
-    } catch (error) {
-      console.error('Error loading persisted chat data:', error);
-      return { messages: [], sessionId: null, history: [] };
-    }
-  };
-
-  const persistedData = loadPersistedData();
-  
-  const [messages, setMessages] = useState(persistedData.messages);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
-  const [sessionId, setSessionId] = useState(persistedData.sessionId);
-  const [history, setHistory] = useState(persistedData.history);
+  const [sessionId, setSessionId] = useState(null);
+  const [history, setHistory] = useState([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const messagesEndRef = useRef(null);
   const sessionInitialized = useRef(false);
@@ -50,27 +25,6 @@ export const Chat = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  // Persist messages to localStorage whenever they change
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem(CHAT_STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
-    }
-  }, [messages]);
-
-  // Persist session ID to localStorage whenever it changes
-  useEffect(() => {
-    if (sessionId) {
-      localStorage.setItem(CHAT_STORAGE_KEYS.SESSION_ID, sessionId);
-    }
-  }, [sessionId]);
-
-  // Persist history to localStorage whenever it changes
-  useEffect(() => {
-    if (history.length > 0) {
-      localStorage.setItem(CHAT_STORAGE_KEYS.HISTORY, JSON.stringify(history));
-    }
-  }, [history]);
-
   const initializeChat = async () => {
     try {
       setIsInitializing(true);
@@ -82,15 +36,6 @@ export const Chat = () => {
       
       if (!token) {
         throw new Error('No authentication token found. Please login.');
-      }
-
-      // Check if we have a persisted session ID
-      const persistedSessionId = localStorage.getItem(CHAT_STORAGE_KEYS.SESSION_ID);
-      if (persistedSessionId) {
-        console.log('Using persisted session ID:', persistedSessionId);
-        setSessionId(persistedSessionId);
-        setIsInitializing(false);
-        return; // Don't create a new session if we have a persisted one
       }
 
       // Get user_id from localStorage
@@ -162,18 +107,34 @@ export const Chat = () => {
     try {
       console.log('Sending message:', { sessionId, message: trimmedInput }); // Debug log
       const data = await sendChatMessage(sessionId, trimmedInput, token);
-      console.log('Message response:', data); // Debug log
+      console.log('Full response received:', JSON.stringify(data, null, 2)); // Detailed debug log
 
-      if (data?.response) {
-        setMessages(prev => [...prev, { sender: "Bot", text: data.response }]);
-        if (data.history) {
-          setHistory(data.history);
+      // Check if response exists (could be 'response' or 'final_answer')
+      const responseText = data?.response || data?.final_answer;
+      
+      if (responseText) {
+        // Enhanced message with metadata
+        const botMessage = {
+          sender: "Bot",
+          text: responseText,
+          metadata: {
+            sql_results: data.sql_results,
+            rag_preview: data.rag_preview,
+            session_memory: data.session_memory
+          }
+        };
+        console.log('Adding bot message:', botMessage); // Debug log
+        setMessages(prev => [...prev, botMessage]);
+        if (data.session_memory) {
+          setHistory(data.session_memory);
         }
       } else {
-        throw new Error("Invalid response from server");
+        console.error('No response text found in data:', data);
+        throw new Error(`Invalid response structure. Received: ${JSON.stringify(data)}`);
       }
     } catch (err) {
       console.error("Error sending message:", err);
+      console.error("Error stack:", err.stack);
       setError(err.message || "Failed to send message");
       // Remove the user's message if send failed
       setMessages(prev => prev.slice(0, -1));
@@ -186,28 +147,6 @@ export const Chat = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
-    }
-  };
-
-  const clearChat = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (sessionId && token) {
-        await endChatSession(sessionId, token);
-      }
-    } catch (err) {
-      console.error('Error ending session:', err);
-    } finally {
-      // Clear all chat-related data
-      localStorage.removeItem(CHAT_STORAGE_KEYS.MESSAGES);
-      localStorage.removeItem(CHAT_STORAGE_KEYS.SESSION_ID);
-      localStorage.removeItem(CHAT_STORAGE_KEYS.HISTORY);
-      setMessages([]);
-      setSessionId(null);
-      setHistory([]);
-      sessionInitialized.current = false;
-      // Reinitialize chat
-      initializeChat();
     }
   };
 
@@ -237,20 +176,9 @@ export const Chat = () => {
               <p className="header-subtitle">Powered by advanced AI technology</p>
             </div>
           </div>
-          <div className="header-actions">
-            <div className="header-badge">
-              <div className="status-dot"></div>
-              <span>Online</span>
-            </div>
-            {messages.length > 0 && (
-              <button 
-                className="clear-chat-button" 
-                onClick={clearChat}
-                title="Clear chat and start new session"
-              >
-                <Trash2 size={18} />
-              </button>
-            )}
+          <div className="header-badge">
+            <div className="status-dot"></div>
+            <span>Online</span>
           </div>
         </div>
 
@@ -272,15 +200,15 @@ export const Chat = () => {
                 I'm here to help you make smarter financial decisions. Ask me anything!
               </p>
               <div className="suggestion-cards">
-                <div className="suggestion-card" onClick={() => setInput("What's my portfolio performance?")}>
+                <div className="suggestion-card" onClick={() => setInput("Show me my portfolio with technical analysis")}>
                   <TrendingUp size={20} />
                   <span>Portfolio Analysis</span>
                 </div>
-                <div className="suggestion-card" onClick={() => setInput("Explain stock market basics")}>
+                <div className="suggestion-card" onClick={() => setInput("Analyze my stocks and give recommendations")}>
                   <Lightbulb size={20} />
                   <span>Market Insights</span>
                 </div>
-                <div className="suggestion-card" onClick={() => setInput("What are good trading strategies?")}>
+                <div className="suggestion-card" onClick={() => setInput("Which stocks should I buy or sell based on technical indicators?")}>
                   <DollarSign size={20} />
                   <span>Trading Tips</span>
                 </div>
@@ -297,6 +225,8 @@ export const Chat = () => {
                 <div className="message-sender">{msg.sender === "You" ? "You" : "AI Assistant"}</div>
                 <div className="message-content">
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       // Custom rendering for better structure
                       h1: ({node, ...props}) => <h1 className="markdown-h1" {...props} />,
