@@ -260,17 +260,17 @@ https://rapid-grossly-raven.ngrok-free.app
 ### Landing Page
 The modern, intuitive homepage with AI-powered features and market indicators.
 
-![Landing Page](screenshots/landing-page.png)
+![Landing Page](screenshots/dashboard.png)
 
 ### Authentication
 Secure login and signup with a beautiful, user-friendly interface.
 
-![Authentication](screenshots/auth-page.png)
+![Authentication](screenshots/authpage.png)
 
 ### AI Financial Assistant
 Get personalized financial advice and portfolio analysis powered by advanced AI.
 
-![AI Assistant](screenshots/ai-assistant.png)
+![AI Assistant](screenshots/aiassistant.png)
 
 ### Portfolio Management
 Track your investments in real-time with detailed analytics and performance metrics.
@@ -280,12 +280,12 @@ Track your investments in real-time with detailed analytics and performance metr
 ### Paper Trading Platform
 Practice trading with real-time market data and advanced charting tools.
 
-![Trading View](screenshots/trading-view.png)
+![Trading View](screenshots/tradingview.png)
 
 ### Stock News & Sentiment Analysis
 AI-powered news analysis with sentiment scoring for your portfolio stocks.
 
-![Stock News](screenshots/stock-news.png)
+![Stock News](screenshots/stocknews.png)
 
 ## 🤝 Contributing
 
