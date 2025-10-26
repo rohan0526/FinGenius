@@ -1,608 +1,293 @@
-# 📰 FinGenius - Portfolio News Sentiment Analysis
+# FinGenius 🚀
 
-> AI-powered news sentiment analysis for your stock portfolio with real-time recommendations
+> Your AI-powered financial assistant for smart investing and portfolio management
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![React](https://img.shields.io/badge/React-18.3.1-61DAFB.svg)
-![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-
----
+[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.3.0-green.svg)](https://flask.palletsprojects.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.0.6-38B2AC.svg)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
-- [Quick Start](#quick-start)
-- [Architecture](#architecture)
-- [Setup Instructions](#setup-instructions)
-- [UI Features](#ui-features)
-- [API Documentation](#api-documentation)
 - [Tech Stack](#tech-stack)
-- [Troubleshooting](#troubleshooting)
-- [Development](#development)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+- [API Endpoints](#api-endpoints)
+- [Usage](#usage)
+- [Screenshots](#screenshots)
+- [Contributing](#contributing)
+- [License](#license)
 
----
+## 🌟 Overview
 
-## 🎯 Overview
-
-FinGenius News Sentiment Analysis is a modern web application that analyzes news sentiment for your stock portfolio using AI-powered VADER-like sentiment analysis. It fetches real-time news from Google News RSS, analyzes sentiment, and provides BUY/SELL/HOLD recommendations.
-
-### Key Capabilities
-
-✅ **Real-time News Analysis** - Fetches 25 news articles per stock  
-✅ **VADER Sentiment Scoring** - Compound scores from -1 to +1  
-✅ **Smart Recommendations** - BUY/SELL/HOLD based on sentiment thresholds  
-✅ **Clickable Headlines** - Direct links to full articles  
-✅ **Keyword Extraction** - Identifies positive/negative themes  
-✅ **Modern UI** - Glassmorphism, gradients, and smooth animations  
-
----
+**FinGenius** is a comprehensive financial platform that combines AI-powered insights, real-time market data, and interactive learning tools to help users make informed investment decisions. The platform features an intelligent chatbot, advanced trading views, portfolio management, market news analysis, and educational finance games.
 
 ## ✨ Features
 
-### 🔍 Sentiment Analysis
-- **VADER-like Algorithm**: Custom implementation with 18 positive and 18 negative keywords
-- **Compound Scoring**: Normalized scores between -1 (very negative) and +1 (very positive)
-- **Multi-dimensional Analysis**: Positive, negative, and neutral component scores
-- **Threshold-based Recommendations**:
-  - BUY: Sentiment ≥ 0.15 AND >40% positive articles
-  - SELL: Sentiment ≤ -0.15 AND >40% negative articles
-  - HOLD: Mixed or neutral sentiment
+### 🤖 AI Financial Assistant
+- **Personalized Advice**: Get AI-powered financial recommendations tailored to your portfolio
+- **Real-time Analysis**: Instant market insights and trend analysis
+- **Portfolio Optimization**: Smart suggestions to improve your investment strategy
+- **Natural Language Processing**: Ask questions in plain English and get detailed responses
 
-### 📊 Portfolio Integration
-- Automatic portfolio fetching from backend
-- Individual analysis for each stock
-- Expandable/collapsible stock cards
-- Real-time sentiment scores
-- Confidence percentages
+### 📊 Advanced Trading View
+- **Live Market Data**: Real-time stock prices and market indicators
+- **Technical Analysis**: Professional-grade charting tools
+- **Multi-timeframe Analysis**: View data across different time periods
+- **Custom Alerts**: Set up notifications for price movements
 
-### 🎨 Modern UI Design
-- **Glassmorphism Effects**: Frosted glass stats cards
-- **Gradient Overlays**: Purple header, colored badges
-- **Smooth Animations**: Hover effects, transitions, shine effects
-- **Responsive Layout**: Works on all screen sizes
-- **Interactive Elements**: Clickable headlines, expandable cards
+### 📰 Market News & Insights
+- **Curated News Feed**: Latest financial news from Google News RSS
+- **Sentiment Analysis**: AI-powered analysis of market sentiment
+- **Stock-specific News**: Get news for specific tickers (supports Indian stocks with .NS/.BO suffixes)
+- **Batch Processing**: Fetch news for multiple stocks simultaneously
 
-### 🔗 Clickable News Headlines
-- All headlines are clickable links
-- Opens full article in new tab
-- Source attribution visible
-- Hover effects for visual feedback
-- Security best practices (`rel="noopener noreferrer"`)
+### 🎮 Interactive Finance Games
+- **Budget Game**: Learn budgeting and financial planning
+- **Escape Room**: Solve financial puzzles and challenges
+- **Fake or Finance**: Test your knowledge of financial facts
 
----
+### 💼 Portfolio Management
+- **Real-time Tracking**: Monitor your investments in real-time
+- **Performance Analytics**: Detailed insights into portfolio performance
+- **Risk Assessment**: Understand your investment risk profile
 
-## 🚀 Quick Start
+## 🛠️ Tech Stack
+
+### Frontend
+- **React** (18.3.1) - UI framework
+- **React Router** (7.1.5) - Navigation and routing
+- **TailwindCSS** (4.0.6) - Utility-first CSS framework
+- **shadcn/ui** - Modern UI components
+- **Lucide React** - Beautiful icon library
+- **Axios** - HTTP client for API requests
+- **React Markdown** - Markdown rendering with syntax highlighting
+- **Socket.io Client** (4.8.1) - Real-time communication
+
+### Backend
+- **Flask** (2.3.0) - Python web framework
+- **Flask-CORS** (4.0.0) - Cross-Origin Resource Sharing
+- **Feedparser** (6.0.10) - RSS feed parsing for news
+
+### Additional Libraries
+- **@radix-ui/react-slot** - Primitive UI components
+- **class-variance-authority** - CSS class management
+- **rehype-highlight** - Syntax highlighting for code blocks
+- **remark-gfm** - GitHub Flavored Markdown support
+
+## 📁 Project Structure
+
+```
+FinGenius/
+├── my-frontend/                 # React frontend application
+│   ├── public/                  # Static assets
+│   ├── src/
+│   │   ├── assets/              # Images, logos, and static files
+│   │   ├── components/          # React components
+│   │   │   ├── AuthPage/        # Authentication components
+│   │   │   ├── Chat/            # Chat interface
+│   │   │   ├── HomePage/        # Main landing page
+│   │   │   ├── NAVBAR/          # Navigation bar
+│   │   │   ├── Portfolio/       # Portfolio management
+│   │   │   ├── StockNews/       # News feed component
+│   │   │   └── TradingView/     # Trading charts and data
+│   │   ├── context/             # React context providers
+│   │   │   └── AuthContext.js   # Authentication state management
+│   │   ├── game/                # Game routing logic
+│   │   ├── pages/               # Page components
+│   │   │   ├── BudgetGame.jsx   # Budget management game
+│   │   │   ├── EscapeRoom.jsx   # Financial escape room
+│   │   │   ├── FakeOrFinance.jsx # Quiz game
+│   │   │   └── GamesPage.jsx    # Games hub
+│   │   ├── services/            # API service layer
+│   │   │   └── chatService.js   # Chat API integration
+│   │   ├── styles/              # Global styles and CSS
+│   │   ├── App.js               # Main application component
+│   │   └── index.js             # Application entry point
+│   ├── package.json             # Frontend dependencies
+│   └── .gitignore               # Git ignore rules
+├── backend_news_proxy.py        # Flask backend for news API
+├── requirements_news.txt        # Python dependencies
+└── README.md                    # Project documentation
+
+```
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.12+
-- Node.js 16+
-- npm or yarn
+
+Before you begin, ensure you have the following installed:
+- **Node.js** (v14 or higher)
+- **npm** or **yarn**
+- **Python** (3.8 or higher)
+- **pip** (Python package manager)
 
 ### Installation
 
 1. **Clone the repository**
-```bash
-cd C:\Users\rohan05\Desktop\Projects\frontend\FinGenius
-```
+   ```bash
+   git clone https://github.com/yourusername/FinGenius.git
+   cd FinGenius
+   ```
 
-2. **Install Python dependencies**
-```bash
-pip install -r requirements_news.txt
-```
+2. **Install Frontend Dependencies**
+   ```bash
+   cd my-frontend
+   npm install
+   ```
 
-3. **Install React dependencies**
-```bash
-cd my-frontend
-npm install
-```
+3. **Install Backend Dependencies**
+   ```bash
+   cd ..
+   pip install -r requirements_news.txt
+   ```
 
 ### Running the Application
 
-**Terminal 1 - Start Backend Proxy:**
-```bash
-python backend_news_proxy.py
-```
+#### Start the Backend Server
 
-You should see:
-```
-============================================================
-FinGenius News Proxy API
-============================================================
-Starting server on http://localhost:5001
-Endpoints:
-  GET  /api/news/<ticker>        - Get news for single ticker
-  POST /api/news/batch            - Get news for multiple tickers
-  GET  /health                    - Health check
-============================================================
-```
-
-**Terminal 2 - Start React App:**
-```bash
-cd my-frontend
-npm start
-```
-
-**Access the app:**
-Open [http://localhost:3000](http://localhost:3000) and navigate to **Stock News** page
-
----
-
-## 🏗️ Architecture
-
-### System Flow
-```
-React App (localhost:3000)
-    ↓ (fetch request)
-Backend Proxy (localhost:5001)
-    ↓ (server-side request - no CORS)
-Google News RSS
-    ↓ (XML response)
-Backend Proxy (parses RSS)
-    ↓ (JSON response)
-React App (sentiment analysis & display)
-```
-
-### Why Backend Proxy?
-**Problem**: Browsers block direct requests to Google News from client-side JavaScript (CORS policy)
-
-**Solution**: Backend proxy server that:
-- Fetches news server-side (no CORS restrictions)
-- Parses RSS XML to JSON
-- Returns clean data to React app
-
-### Data Flow
-1. User opens Stock News page
-2. React fetches user's portfolio
-3. For each stock:
-   - Request news from backend proxy
-   - Backend fetches from Google News RSS
-   - React analyzes sentiment
-   - Displays results with recommendations
-
----
-
-## 📖 Setup Instructions
-
-### Step 1: Install Python Dependencies
-
-```bash
-cd C:\Users\rohan05\Desktop\Projects\frontend\FinGenius
-pip install -r requirements_news.txt
-```
-
-**Dependencies:**
-- Flask==2.3.0
-- flask-cors==4.0.0
-- feedparser==6.0.10
-
-### Step 2: Start Backend News Proxy
+The backend provides news fetching and sentiment analysis services.
 
 ```bash
 python backend_news_proxy.py
 ```
 
-The server will start on `http://localhost:5001`
+The Flask server will start on `http://localhost:5001`
 
-### Step 3: Start React App
+**Available Endpoints:**
+- `GET /api/news/<ticker>` - Get news for a single ticker
+- `POST /api/news/batch` - Get news for multiple tickers
+- `GET /health` - Health check endpoint
+
+#### Start the Frontend Application
 
 ```bash
 cd my-frontend
 npm start
 ```
 
-The app will open at `http://localhost:3000`
+The React application will start on `http://localhost:3000`
 
-### Step 4: Navigate to Stock News
+## 🔌 API Endpoints
 
-Click on **Stock News** in the navigation menu
-
----
-
-## 🎨 UI Features
-
-### Modern Design Elements
-
-#### 1. **Header Section**
-- Purple gradient background (#667eea → #764ba2)
-- Enhanced shadow with color
-- Centered typography
-- Responsive padding
-
-#### 2. **Portfolio Overview Card**
-- Decorative radial gradient pattern
-- Layered depth effect
-- Large icon (36px) with thick stroke
-- Enhanced shadow (0 10px 30px)
-- Rounded corners (20px)
-
-#### 3. **Stock Cards**
-- Gradient backgrounds (BUY/SELL/HOLD)
-- Scale animation on expand (1.01)
-- Cubic bezier transitions
-- Subtle shine effect
-- Deep shadows (0 8px 24px)
-
-#### 4. **Action Badges**
-- Gradient backgrounds:
-  - BUY: #28a745 → #20c997
-  - SELL: #dc3545 → #e74c3c
-  - HOLD: #ffc107 → #ffb300
-- White border overlay
-- Uppercase text with letter spacing
-- Enhanced shadows
-
-#### 5. **Stats Cards (Glassmorphism)**
-- Semi-transparent background (95% opacity)
-- Backdrop blur effect (10px)
-- Hover lift animation (translateY -4px)
-- Dynamic shadows on hover
-- Colored borders matching sentiment
-- Large numbers (28px, weight 800)
-
-#### 6. **Keyword Pills**
-- Individual colored tags
-- Green for positive, red for negative
-- Gradient background container
-- Rounded corners (12px)
-
-#### 7. **Clickable Headlines**
-- Full article links
-- Hover slide effect (4px right)
-- Source attribution in blue
-- Smooth transitions (0.2s)
-- Security attributes
-
-### Color Palette
-
-```css
-Primary Gradient: #667eea → #764ba2
-Background: #f5f7fa
-Text Dark: #1a202c
-Text Medium: #2c3e50
-
-Success: #28a745 → #20c997
-Danger: #dc3545 → #e74c3c
-Warning: #ffc107 → #ffb300
-Info: #007bff
-```
-
-### Animations
-
-1. **Shine Effect** - Subtle moving gradient on cards
-2. **Hover Lift** - Stats cards lift up on hover
-3. **Scale Transform** - Expanded cards grow slightly
-4. **Smooth Transitions** - Cubic bezier easing
-
----
-
-## 📡 API Documentation
-
-### Backend Proxy Endpoints
+### News Proxy API (Port 5001)
 
 #### Get News for Single Ticker
 ```http
-GET http://localhost:5001/api/news/<ticker>?limit=25
+GET /api/news/<ticker>?limit=25
 ```
 
-**Parameters:**
-- `ticker` (path): Stock ticker symbol (e.g., AAPL, TSLA)
-- `limit` (query): Number of articles (default: 25)
+**Example:**
+```bash
+curl http://localhost:5001/api/news/RELIANCE.NS?limit=10
+```
 
 **Response:**
 ```json
 {
-  "ticker": "AAPL",
-  "company_name": "AAPL",
+  "ticker": "RELIANCE.NS",
+  "company_name": "RELIANCE",
   "news": {
     "headlines": ["..."],
     "sources": ["..."],
     "dates": ["..."],
     "links": ["..."],
-    "count": 25
+    "count": 10
   },
   "success": true
 }
 ```
 
-#### Get News for Multiple Tickers (Batch)
+#### Get News for Multiple Tickers
 ```http
-POST http://localhost:5001/api/news/batch
+POST /api/news/batch
 Content-Type: application/json
 
 {
-  "tickers": ["AAPL", "TSLA", "RELIANCE.NS"],
-  "limit": 25
+  "tickers": ["RELIANCE.NS", "TCS.NS", "INFY.NS"],
+  "limit": 10
 }
 ```
 
-**Response:**
-```json
-{
-  "results": [
-    {
-      "ticker": "AAPL",
-      "news": {...},
-      "success": true
-    }
-  ],
-  "total_tickers": 3
-}
+### Main Backend API (ngrok endpoint)
+
+The application connects to a main backend API hosted at:
+```
+https://rapid-grossly-raven.ngrok-free.app
 ```
 
-#### Health Check
-```http
-GET http://localhost:5001/health
-```
+**Key Endpoints:**
+- `/gemini/ask` - AI assistant queries
+- `/trade/portfolio` - Portfolio management
+- `/chat/start` - Start chat session
+- `/chat/message` - Send chat message
+- `/chat/end` - End chat session
 
-**Response:**
-```json
-{
-  "status": "ok",
-  "service": "FinGenius News Proxy"
-}
-```
+## 💡 Usage
 
----
+### Authentication
+1. Navigate to the application at `http://localhost:3000`
+2. Sign up for a new account or log in with existing credentials
+3. Your authentication token will be stored securely
 
-## 🛠️ Tech Stack
+### Using the AI Assistant
+1. Click on the **AI Assistant** tab or the floating chat button
+2. Type your financial question or request
+3. The AI will analyze your portfolio and provide personalized recommendations
 
-### Frontend
-- **React 18.3.1** - UI framework
-- **Axios** - HTTP client
-- **Lucide React** - Icon library
-- **React Router** - Navigation
-- **Tailwind CSS** - Utility-first CSS
+### Viewing Market News
+1. Navigate to the **Stock News** section
+2. Search for specific stock tickers
+3. View curated news with sentiment analysis
 
-### Backend
-- **Flask 2.3.0** - Python web framework
-- **Flask-CORS** - CORS handling
-- **feedparser 6.0.10** - RSS feed parser
+### Trading View
+1. Access the **Trading View** tab
+2. Search for stocks and view real-time charts
+3. Use technical indicators for analysis
 
-### Sentiment Analysis
-- **Custom VADER-like Algorithm**
-- **18 Positive Keywords**: surge, gain, profit, growth, rise, up, high, boost, jump, rally, strong, beat, record, success, positive, bullish, upgrade, outperform
-- **18 Negative Keywords**: fall, drop, loss, decline, down, low, cut, crash, plunge, weak, miss, concern, risk, layoff, negative, bearish, downgrade, underperform
-- **Compound Score Calculation**: Normalized between -1 and +1
+### Playing Finance Games
+1. Go to the **Finance Games** section
+2. Choose from Budget Game, Escape Room, or Fake or Finance
+3. Learn financial concepts through interactive gameplay
 
----
+## 📸 Screenshots
 
-## 🐛 Troubleshooting
+*Add screenshots of your application here*
 
-### Backend Not Starting
+## 🤝 Contributing
 
-**Issue**: Port 5001 already in use
+Contributions are welcome! Please follow these steps:
 
-**Solution**:
-```bash
-# Windows
-netstat -ano | findstr :5001
-taskkill /PID <PID> /F
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-# Change port in backend_news_proxy.py
-app.run(debug=True, port=5002)  # Use different port
-```
+## 📄 License
 
-**Issue**: Flask not installed
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-**Solution**:
-```bash
-pip list | grep Flask
-pip install -r requirements_news.txt
-```
+## 👥 Authors
 
-### CORS Errors
-
-**Issue**: Still getting CORS errors
-
-**Checklist**:
-- ✅ Backend running on port 5001
-- ✅ Using `http://localhost:5001` not `https`
-- ✅ Flask-CORS installed
-- ✅ Check browser console for actual request URL
-
-### No News Showing
-
-**Issue**: "No stocks found in your portfolio"
-
-**Solution**:
-1. Verify you're logged in
-2. Add stocks to your portfolio first
-3. Check backend terminal for logs
-4. Refresh the page
-
-**Issue**: News not loading for specific stocks
-
-**Solution**:
-- Check backend logs for errors
-- Verify ticker symbol is correct
-- Try with a different stock
-- Check Google News RSS is accessible
-
-### UI Issues
-
-**Issue**: Styles not loading
-
-**Solution**:
-```bash
-cd my-frontend
-npm install
-npm start
-```
-
-**Issue**: Icons not showing
-
-**Solution**:
-```bash
-npm install lucide-react
-```
-
----
-
-## 💻 Development
-
-### Available Scripts
-
-In the `my-frontend` directory:
-
-#### `npm start`
-Runs the app in development mode at [http://localhost:3000](http://localhost:3000)
-
-#### `npm test`
-Launches the test runner in interactive watch mode
-
-#### `npm run build`
-Builds the app for production to the `build` folder
-
-#### `npm run eject`
-**Note: This is a one-way operation!**
-
-Ejects from Create React App for full configuration control
-
-### Project Structure
-
-```
-FinGenius/
-├── backend_news_proxy.py       # Flask backend server
-├── requirements_news.txt       # Python dependencies
-├── README.md                   # This file
-├── my-frontend/                # React application
-│   ├── src/
-│   │   ├── components/
-│   │   │   └── StockNews/
-│   │   │       ├── index.js    # Main component
-│   │   │       └── CSS/
-│   │   ├── App.js
-│   │   └── index.js
-│   ├── public/
-│   ├── package.json
-│   └── package-lock.json
-```
-
-### Key Files
-
-- **`backend_news_proxy.py`**: Flask server that fetches news from Google News RSS
-- **`StockNews/index.js`**: Main React component with sentiment analysis logic
-- **`requirements_news.txt`**: Python package dependencies
-
-### Environment Variables
-
-Create `.env` file in `my-frontend/`:
-```env
-REACT_APP_BACKEND_URL=http://localhost:5001
-```
-
----
-
-## 🎯 Features Breakdown
-
-### Sentiment Analysis Details
-
-**Positive Keywords (18)**:
-surge, gain, profit, growth, rise, up, high, boost, jump, rally, strong, beat, record, success, positive, bullish, upgrade, outperform
-
-**Negative Keywords (18)**:
-fall, drop, loss, decline, down, low, cut, crash, plunge, weak, miss, concern, risk, layoff, negative, bearish, downgrade, underperform
-
-**Scoring Logic**:
-```javascript
-// Each keyword match adds/subtracts 0.3
-score += positiveMatches * 0.3
-score -= negativeMatches * 0.3
-
-// Normalize to -1 to +1
-compound = Math.max(-1, Math.min(1, score))
-```
-
-**Recommendation Thresholds**:
-```javascript
-BUY:  sentiment >= 0.15  AND positiveRatio > 0.4
-SELL: sentiment <= -0.15 AND negativeRatio > 0.4
-HOLD: Everything else
-```
-
-**Confidence Calculation**:
-```javascript
-confidence = 0.5 + (sentiment * 2) + (ratio * 0.3)
-// Capped at 95%
-```
-
----
-
-## 🚀 Deployment
-
-### Deploy Backend (Heroku Example)
-
-1. Create `Procfile`:
-```
-web: python backend_news_proxy.py
-```
-
-2. Update port binding:
-```python
-port = int(os.environ.get('PORT', 5001))
-app.run(host='0.0.0.0', port=port)
-```
-
-3. Deploy:
-```bash
-heroku create fingenius-news-api
-git push heroku main
-```
-
-### Deploy Frontend (Netlify Example)
-
-1. Build the app:
-```bash
-cd my-frontend
-npm run build
-```
-
-2. Update backend URL in code:
-```javascript
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://your-backend.herokuapp.com';
-```
-
-3. Deploy `build/` folder to Netlify
-
----
-
-## 📝 License
-
-MIT License - feel free to use this project for learning or commercial purposes.
-
----
+- **Your Name** - *Initial work*
 
 ## 🙏 Acknowledgments
 
 - Google News RSS for news data
-- VADER sentiment analysis methodology
-- React and Flask communities
-- Lucide for beautiful icons
+- OpenAI/Gemini for AI capabilities
+- TradingView for charting inspiration
+- shadcn/ui for beautiful components
+
+## 📞 Support
+
+For support, email support@fingenius.com or open an issue in the repository.
 
 ---
 
-## 📧 Support
-
-For issues or questions:
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Review backend logs
-3. Check browser console for errors
-
----
-
-## 🔮 Future Enhancements
-
-1. **Dark Mode** - Toggle for dark theme
-2. **Export Feature** - Download analysis as PDF
-3. **Historical Data** - Track sentiment over time
-4. **Email Alerts** - Notify on significant sentiment changes
-5. **More Sources** - Integrate additional news APIs
-6. **Machine Learning** - Advanced sentiment models
-7. **Social Sentiment** - Twitter/Reddit integration
-8. **Price Correlation** - Compare sentiment vs stock price
-
----
-
-**Built with ❤️ for better investment decisions**
+**Made with ❤️ by the FinGenius Team**

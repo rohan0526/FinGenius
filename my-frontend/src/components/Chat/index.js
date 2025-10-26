@@ -1,16 +1,51 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { startChatSession, sendChatMessage, endChatSession } from "../../services/chatService";
+import { startChatSession, sendChatMessage } from "../../services/chatService";
 import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign } from "lucide-react";
 import "./CSS/index.css";
 
+// Helper functions for user-specific storage
+const getStorageKey = (key) => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      const userData = JSON.parse(storedUser);
+      return `${key}_${userData.user_id}`;
+    } catch (e) {
+      console.error('Error parsing user data:', e);
+    }
+  }
+  return key;
+};
+
+const getFromStorage = (key, defaultValue = null) => {
+  try {
+    const userKey = getStorageKey(key);
+    const saved = sessionStorage.getItem(userKey);
+    return saved ? JSON.parse(saved) : defaultValue;
+  } catch (e) {
+    console.error('Error loading from storage:', e);
+    return defaultValue;
+  }
+};
+
+const saveToStorage = (key, value) => {
+  try {
+    const userKey = getStorageKey(key);
+    sessionStorage.setItem(userKey, JSON.stringify(value));
+  } catch (e) {
+    console.error('Error saving to storage:', e);
+  }
+};
+
 export const Chat = () => {
-  const [messages, setMessages] = useState([]);
+  // Load initial state from sessionStorage (user-specific)
+  const [messages, setMessages] = useState(() => getFromStorage('chatMessages', []));
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
-  const [sessionId, setSessionId] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [sessionId, setSessionId] = useState(() => getFromStorage('chatSessionId', null));
+  const [history, setHistory] = useState(() => getFromStorage('chatHistory', []));
   const [isInitializing, setIsInitializing] = useState(true);
   const messagesEndRef = useRef(null);
   const sessionInitialized = useRef(false);
@@ -23,17 +58,42 @@ export const Chat = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const initializeChat = async () => {
+  // Save messages to sessionStorage whenever they change (user-specific)
+  useEffect(() => {
+    saveToStorage('chatMessages', messages);
+  }, [messages]);
+
+  // Save session ID to sessionStorage whenever it changes (user-specific)
+  useEffect(() => {
+    if (sessionId) {
+      saveToStorage('chatSessionId', sessionId);
+    }
+  }, [sessionId]);
+
+  // Save history to sessionStorage whenever it changes (user-specific)
+  useEffect(() => {
+    saveToStorage('chatHistory', history);
+  }, [history]);
+
+  const initializeChat = useCallback(async () => {
     try {
       setIsInitializing(true);
       setError(null);
       const token = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
+      const existingSessionId = getFromStorage('chatSessionId', null);
       
       console.log('Initializing chat with token:', token?.substring(0, 20) + '...'); // Debug log
       
       if (!token) {
         throw new Error('No authentication token found. Please login.');
+      }
+
+      // If we have an existing session and messages, skip initialization
+      if (existingSessionId && messages.length > 0) {
+        console.log('Restoring existing session:', existingSessionId);
+        setIsInitializing(false);
+        return;
       }
 
       // Get user_id from localStorage
@@ -71,7 +131,7 @@ export const Chat = () => {
     } finally {
       setIsInitializing(false);
     }
-  };
+  }, [messages.length]);
 
   useEffect(() => {
     if (!sessionInitialized.current) {
@@ -80,12 +140,10 @@ export const Chat = () => {
     }
 
     return () => {
-      if (sessionId) {
-        const token = localStorage.getItem('token');
-        endChatSession(sessionId, token).catch(console.error);
-      }
+      // Don't end session on unmount - keep it alive for when user returns
+      // Session will be reused when component remounts
     };
-  }, [sessionId]);
+  }, [initializeChat]);
 
   const sendMessage = useCallback(async () => {
     const trimmedInput = input.trim();

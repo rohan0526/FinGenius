@@ -133,6 +133,10 @@ export const AuthProvider = ({ children }) => {
       // Clean up client side regardless of server response
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      
+      // Clear all chat-related sessionStorage
+      sessionStorage.clear();
+      
       socket.disconnect(); // Disconnect from WebSocket
       setUser(null);
       window.location.reload(); // Reload to ensure user is logged out
