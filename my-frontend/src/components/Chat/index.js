@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
 import { startChatSession, sendChatMessage, endChatSession } from "../../services/chatService";
-import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign, BarChart3, AlertCircle } from "lucide-react";
+import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign } from "lucide-react";
 import "./CSS/index.css";
 
 export const Chat = () => {
@@ -107,34 +105,18 @@ export const Chat = () => {
     try {
       console.log('Sending message:', { sessionId, message: trimmedInput }); // Debug log
       const data = await sendChatMessage(sessionId, trimmedInput, token);
-      console.log('Full response received:', JSON.stringify(data, null, 2)); // Detailed debug log
+      console.log('Message response:', data); // Debug log
 
-      // Check if response exists (could be 'response' or 'final_answer')
-      const responseText = data?.response || data?.final_answer;
-      
-      if (responseText) {
-        // Enhanced message with metadata
-        const botMessage = {
-          sender: "Bot",
-          text: responseText,
-          metadata: {
-            sql_results: data.sql_results,
-            rag_preview: data.rag_preview,
-            session_memory: data.session_memory
-          }
-        };
-        console.log('Adding bot message:', botMessage); // Debug log
-        setMessages(prev => [...prev, botMessage]);
-        if (data.session_memory) {
-          setHistory(data.session_memory);
+      if (data?.response) {
+        setMessages(prev => [...prev, { sender: "Bot", text: data.response }]);
+        if (data.history) {
+          setHistory(data.history);
         }
       } else {
-        console.error('No response text found in data:', data);
-        throw new Error(`Invalid response structure. Received: ${JSON.stringify(data)}`);
+        throw new Error("Invalid response from server");
       }
     } catch (err) {
       console.error("Error sending message:", err);
-      console.error("Error stack:", err.stack);
       setError(err.message || "Failed to send message");
       // Remove the user's message if send failed
       setMessages(prev => prev.slice(0, -1));
@@ -200,15 +182,15 @@ export const Chat = () => {
                 I'm here to help you make smarter financial decisions. Ask me anything!
               </p>
               <div className="suggestion-cards">
-                <div className="suggestion-card" onClick={() => setInput("Show me my portfolio with technical analysis")}>
+                <div className="suggestion-card" onClick={() => setInput("What's my portfolio performance?")}>
                   <TrendingUp size={20} />
                   <span>Portfolio Analysis</span>
                 </div>
-                <div className="suggestion-card" onClick={() => setInput("Analyze my stocks and give recommendations")}>
+                <div className="suggestion-card" onClick={() => setInput("Explain stock market basics")}>
                   <Lightbulb size={20} />
                   <span>Market Insights</span>
                 </div>
-                <div className="suggestion-card" onClick={() => setInput("Which stocks should I buy or sell based on technical indicators?")}>
+                <div className="suggestion-card" onClick={() => setInput("What are good trading strategies?")}>
                   <DollarSign size={20} />
                   <span>Trading Tips</span>
                 </div>
@@ -225,8 +207,6 @@ export const Chat = () => {
                 <div className="message-sender">{msg.sender === "You" ? "You" : "AI Assistant"}</div>
                 <div className="message-content">
                   <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
                     components={{
                       // Custom rendering for better structure
                       h1: ({node, ...props}) => <h1 className="markdown-h1" {...props} />,
