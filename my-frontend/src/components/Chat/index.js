@@ -1,16 +1,43 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { startChatSession, sendChatMessage, endChatSession } from "../../services/chatService";
-import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign } from "lucide-react";
+import { Send, Bot, User, Sparkles, TrendingUp, Lightbulb, DollarSign, Trash2 } from "lucide-react";
 import "./CSS/index.css";
 
+// LocalStorage keys for chat persistence
+const CHAT_STORAGE_KEYS = {
+  MESSAGES: 'fingenius_chat_messages',
+  SESSION_ID: 'fingenius_chat_session_id',
+  HISTORY: 'fingenius_chat_history'
+};
+
 export const Chat = () => {
-  const [messages, setMessages] = useState([]);
+  // Load persisted data from localStorage
+  const loadPersistedData = () => {
+    try {
+      const savedMessages = localStorage.getItem(CHAT_STORAGE_KEYS.MESSAGES);
+      const savedSessionId = localStorage.getItem(CHAT_STORAGE_KEYS.SESSION_ID);
+      const savedHistory = localStorage.getItem(CHAT_STORAGE_KEYS.HISTORY);
+      
+      return {
+        messages: savedMessages ? JSON.parse(savedMessages) : [],
+        sessionId: savedSessionId || null,
+        history: savedHistory ? JSON.parse(savedHistory) : []
+      };
+    } catch (error) {
+      console.error('Error loading persisted chat data:', error);
+      return { messages: [], sessionId: null, history: [] };
+    }
+  };
+
+  const persistedData = loadPersistedData();
+  
+  const [messages, setMessages] = useState(persistedData.messages);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
-  const [sessionId, setSessionId] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [sessionId, setSessionId] = useState(persistedData.sessionId);
+  const [history, setHistory] = useState(persistedData.history);
   const [isInitializing, setIsInitializing] = useState(true);
   const messagesEndRef = useRef(null);
   const sessionInitialized = useRef(false);
@@ -23,6 +50,27 @@ export const Chat = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  // Persist messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(CHAT_STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Persist session ID to localStorage whenever it changes
+  useEffect(() => {
+    if (sessionId) {
+      localStorage.setItem(CHAT_STORAGE_KEYS.SESSION_ID, sessionId);
+    }
+  }, [sessionId]);
+
+  // Persist history to localStorage whenever it changes
+  useEffect(() => {
+    if (history.length > 0) {
+      localStorage.setItem(CHAT_STORAGE_KEYS.HISTORY, JSON.stringify(history));
+    }
+  }, [history]);
+
   const initializeChat = async () => {
     try {
       setIsInitializing(true);
@@ -34,6 +82,15 @@ export const Chat = () => {
       
       if (!token) {
         throw new Error('No authentication token found. Please login.');
+      }
+
+      // Check if we have a persisted session ID
+      const persistedSessionId = localStorage.getItem(CHAT_STORAGE_KEYS.SESSION_ID);
+      if (persistedSessionId) {
+        console.log('Using persisted session ID:', persistedSessionId);
+        setSessionId(persistedSessionId);
+        setIsInitializing(false);
+        return; // Don't create a new session if we have a persisted one
       }
 
       // Get user_id from localStorage
@@ -132,6 +189,28 @@ export const Chat = () => {
     }
   };
 
+  const clearChat = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (sessionId && token) {
+        await endChatSession(sessionId, token);
+      }
+    } catch (err) {
+      console.error('Error ending session:', err);
+    } finally {
+      // Clear all chat-related data
+      localStorage.removeItem(CHAT_STORAGE_KEYS.MESSAGES);
+      localStorage.removeItem(CHAT_STORAGE_KEYS.SESSION_ID);
+      localStorage.removeItem(CHAT_STORAGE_KEYS.HISTORY);
+      setMessages([]);
+      setSessionId(null);
+      setHistory([]);
+      sessionInitialized.current = false;
+      // Reinitialize chat
+      initializeChat();
+    }
+  };
+
   if (isInitializing) {
     return (
       <div className="chat-page">
@@ -158,9 +237,20 @@ export const Chat = () => {
               <p className="header-subtitle">Powered by advanced AI technology</p>
             </div>
           </div>
-          <div className="header-badge">
-            <div className="status-dot"></div>
-            <span>Online</span>
+          <div className="header-actions">
+            <div className="header-badge">
+              <div className="status-dot"></div>
+              <span>Online</span>
+            </div>
+            {messages.length > 0 && (
+              <button 
+                className="clear-chat-button" 
+                onClick={clearChat}
+                title="Clear chat and start new session"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
           </div>
         </div>
 
