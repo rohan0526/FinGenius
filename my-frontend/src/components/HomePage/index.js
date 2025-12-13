@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import "./CSS/index.css";
-import { User, Settings, Home, HelpCircle, LogOut, Trash2, PenLine, Cpu, X, MessageCircle, TrendingUp, Sparkles, Zap, Shield, BarChart3, Newspaper, Gamepad2, ArrowRight, Star } from "lucide-react";
+import { User, Settings, Home, HelpCircle, LogOut, Trash2, PenLine, Cpu, TrendingUp, Sparkles, Zap, Shield, BarChart3, Newspaper, Gamepad2, ArrowRight, Star } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -21,7 +21,7 @@ const QueryApp = () => {
     if (storedToken) {
       setToken(storedToken);
     }
-    
+
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
@@ -43,11 +43,11 @@ const QueryApp = () => {
     try {
       const res = await fetch("https://rapid-grossly-raven.ngrok-free.app/gemini/ask", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": token ? `Bearer ${token}` : ""
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           query,
           user_id: userId // Include user ID in the request body
         }),
@@ -87,31 +87,31 @@ export const HomePage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Check for query parameter first, then localStorage
   const [activeTab, setActiveTab] = useState(() => {
     // First check URL query params
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    
+
     if (tabParam === 'stock-news') {
       return 'stock-news';
     }
-    
+
     // Then check localStorage
     const savedTab = localStorage.getItem('activeTab');
     if (savedTab) {
       return savedTab;
     }
-    
+
     return "home";
   });
-  
+
   // Update activeTab when URL changes
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    
+
     if (tabParam === 'stock-news') {
       setActiveTab('stock-news');
     } else {
@@ -123,13 +123,10 @@ export const HomePage = () => {
       }
     }
   }, [location.search]);
-  
+
   const [isWriting, setIsWriting] = useState(false);
   const [postContent, setPostContent] = useState("");
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+
   const [portfolio, setPortfolio] = useState([]);
   const [token, setToken] = useState("");
   const [userId, setUserId] = useState("");
@@ -138,11 +135,11 @@ export const HomePage = () => {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    
+
     if (storedToken) {
       setToken(storedToken);
     }
-    
+
     if (storedUser) {
       try {
         const userData = JSON.parse(storedUser);
@@ -180,37 +177,7 @@ export const HomePage = () => {
     }
   }, [token]);
 
-  const sendMessage = async () => {
-    if (!chatInput.trim()) return;
 
-    // Add user message to chat
-    const userMessage = { sender: "You", text: chatInput };
-    setChatMessages(prev => [...prev, userMessage]);
-    setChatInput("");
-    setIsTyping(true);
-
-    try {
-      // Include portfolio data in the query
-      const response = await axios.post("https://rapid-grossly-raven.ngrok-free.app/gemini/ask", {
-        query: chatInput,
-        portfolio: portfolio,
-        user_id: userId // Include user ID in the request body
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Include token in requests
-        }
-      });
-
-      setIsTyping(false);
-      if (response.data.response) {
-        setChatMessages(prev => [...prev, { sender: "Bot", text: response.data.response }]);
-      }
-    } catch (error) {
-      setIsTyping(false);
-      setChatMessages(prev => [...prev, { sender: "Bot", text: "Sorry, I encountered an error." }]);
-    }
-  };
 
   useEffect(() => {
     // Check for active tab after component mounts or activeTab changes
@@ -244,8 +211,8 @@ export const HomePage = () => {
             <h1 className="animated-gradient">Transform Your Financial Future</h1>
             <p className="subtitle">Smart Investing Starts Here</p>
             <p className="description">
-              Harness the power of AI to make data-driven investment decisions. 
-              Get real-time market insights, personalized recommendations, and 
+              Harness the power of AI to make data-driven investment decisions.
+              Get real-time market insights, personalized recommendations, and
               professional-grade trading tools—all in one platform.
             </p>
             <div className="hero-buttons">
@@ -539,7 +506,7 @@ export const HomePage = () => {
                 <Settings className="settings-icon" />
                 <span>About</span>
               </div>
-              <div 
+              <div
                 className="settings-option text-red-600"
                 onClick={() => {
                   console.log("Logging out user:", userId);
@@ -569,69 +536,7 @@ export const HomePage = () => {
         <div className="content-area">{renderContent()}</div>
 
         {/* Chat Popup Button */}
-        <button 
-          className="chat-toggle-button"
-          onClick={() => setIsChatOpen(!isChatOpen)}
-        >
-          <MessageCircle size={24} />
-        </button>
 
-        {/* Chat Popup Window */}
-        {isChatOpen && (
-          <div className="chat-popup">
-            <div className="chat-popup-header">
-              <h3>Financial Assistant</h3>
-              <button onClick={() => setIsChatOpen(false)}>
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="chat-popup-messages">
-              {chatMessages.length === 0 && (
-                <div className="welcome-message">
-                  <p>👋 Hello! I'm your AI Financial Assistant. I can help you with:</p>
-                  <ul>
-                    <li>Portfolio analysis</li>
-                    <li>Stock market insights</li>
-                    <li>Trading strategies</li>
-                    <li>Financial concepts</li>
-                  </ul>
-                </div>
-              )}
-              
-              {chatMessages.map((msg, index) => (
-                <div key={index} className={`chat-message ${msg.sender.toLowerCase()}`}>
-                  <div className="message-content">
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
-                  </div>
-                </div>
-              ))}
-              
-              {isTyping && (
-                <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              )}
-            </div>
-
-            <div className="chat-popup-input">
-              <textarea
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Ask me anything about your portfolio or finances..."
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-              />
-              <button onClick={sendMessage}>Send</button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
